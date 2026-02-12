@@ -56,10 +56,10 @@ pub fn format(path: &Path, text: &str) -> Result<Option<String>, FormatError> {
         content = out_lines.join("\n");
     }
 
-    let out = if content == text {
-        None
+    let content = ensure_newline(content);
+    if content == text {
+        Ok(None)
     } else {
-        Some(ensure_newline(content))
-    };
-    Ok(out)
+        Ok(Some(content))
+    }
 }

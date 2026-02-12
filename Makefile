@@ -23,7 +23,7 @@ lint: fmt
 	cargo clippy -- -D warnings
 
 test: lint
-	cargo test --all
+	cargo test --all -- --quiet
 
 build: fmt lint test
 	@command -v cross >/dev/null || (cargo install cross)

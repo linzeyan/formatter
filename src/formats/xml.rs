@@ -21,11 +21,8 @@ pub fn format(_path: &Path, text: &str) -> Result<Option<String>, FormatError> {
         }
         buf.clear();
     }
-    let out =
+    let raw =
         String::from_utf8(writer.into_inner()).map_err(|e| FormatError::Message(e.to_string()))?;
-    if out == text {
-        Ok(None)
-    } else {
-        Ok(Some(ensure_newline(out)))
-    }
+    let out = ensure_newline(raw);
+    if out == text { Ok(None) } else { Ok(Some(out)) }
 }

@@ -10,7 +10,7 @@ pub fn format(_path: &Path, text: &str) -> Result<Option<String>, FormatError> {
     let mut indent: i32 = 0;
 
     for raw_line in text.lines() {
-        let mut line = raw_line.trim();
+        let line = raw_line.trim();
         if line.is_empty() {
             continue;
         }
@@ -30,14 +30,26 @@ pub fn format(_path: &Path, text: &str) -> Result<Option<String>, FormatError> {
             indent = 0;
         }
         out.push_str(&"    ".repeat(indent as usize));
-        // ensure space before { and ; spacing trimmed
-        line = line.trim_end_matches(';');
-        let mut to_write = line.trim().replace('{', " {");
-        to_write = to_write.split_whitespace().collect::<Vec<_>>().join(" ");
-        if raw_line.trim_end().ends_with('{') {
-            to_write.push_str(" {");
+        // determine trailing punctuation from original line
+        let trimmed_raw = raw_line.trim_end();
+        let has_open_brace = trimmed_raw.ends_with('{');
+        let has_semicolon = trimmed_raw.ends_with(';');
+
+        // strip trailing { and ; before normalization
+        let stripped = line.trim_end_matches(';').trim_end_matches('{').trim();
+        // normalize mid-line braces (add space before {) and collapse whitespace
+        let normalized = stripped.replace('{', " {");
+        let mut to_write = normalized.split_whitespace().collect::<Vec<_>>().join(" ");
+
+        // add back trailing punctuation exactly once
+        if has_open_brace {
+            if to_write.is_empty() {
+                to_write.push('{');
+            } else {
+                to_write.push_str(" {");
+            }
         }
-        if raw_line.trim_end().ends_with(';') {
+        if has_semicolon {
             to_write.push(';');
         }
         out.push_str(&to_write);
